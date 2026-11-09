@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://maggotzyt.github.io/forgepoint/"><b>Website</b></a> ·
-  <a href="https://github.com/MagGoTzYT/forgepoint/releases/latest"><b>Download the latest release</b></a>
+  <a href="https://maggotzyt.github.io/forgepoint/#download"><b>Download</b></a>
 </p>
 
 ---
@@ -19,8 +19,8 @@ on the machine it's running on.
 
 ## Download
 
-Go to **[Releases](https://github.com/MagGoTzYT/forgepoint/releases/latest)**
-and pick one:
+Download from the **[website](https://maggotzyt.github.io/forgepoint/#download)**
+or straight from the [`downloads`](downloads) folder here:
 
 | File | What it is |
 |------|------------|
@@ -29,9 +29,8 @@ and pick one:
 | `FORGEPOINT-Portable-arm64.zip` | Windows on ARM, **experimental** (built automatically, not yet tested on ARM hardware) |
 | `SHA256SUMS.txt` | Checksums to verify your download |
 
-> This repository holds the website and the releases only. The FORGEPOINT
-> source code is not published. GitHub automatically adds "Source code" zips
-> to every release: they contain only this website, not the app.
+> This repository holds the website and the finished downloads only. The
+> FORGEPOINT source code is not published.
 
 ### Verify your download
 

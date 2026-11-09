@@ -10,9 +10,9 @@ Include the FORGEPOINT version, your Windows version and steps to reproduce.
 
 ## Verifying downloads
 
-Only download FORGEPOINT from this repository's
-[Releases](https://github.com/MagGoTzYT/forgepoint/releases) page or the
-official website. Every release includes `SHA256SUMS.txt`; check your file
+Only download FORGEPOINT from the official website
+(<https://maggotzyt.github.io/forgepoint/>) or this repository's
+[`downloads`](downloads) folder. Every release includes `SHA256SUMS.txt`; check your file
 with:
 
 ```powershell
