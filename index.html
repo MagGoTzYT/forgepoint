@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FORGEPOINT</title>
+<meta name="description" content="FORGEPOINT is a native Windows console for technicians and IT teams: hardware and Windows health checks, guided repairs, driver backups and a repair-ticket workshop. Local, audited, no telemetry.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  Hosting this page: put the files from the project's dist\ folder in a
+  "downloads" folder next to index.html so the download links resolve.
+-->
+<style>
+:root {
+  /* Instrument panel: graphite ground, one blue signal accent, brand orange
+     reserved for the mark and the single highlight, mono for every spec. */
+  --ground: #0b0e12;
+  --panel: #12161c;
+  --panel-2: #181d25;
+  --line: #232a34;
+  --line-strong: #313a47;
+  --ink: #e8ebf0;
+  --ink-dim: #9aa4b2;
+  --ink-faint: #7e8898;
+  --signal: #4c8dff;
+  --signal-fill: #2f6fe0;
+  --brand: #ff7a1a;
+  --ok: #2fbf71;
+  --warn: #f0b429;
+  --crit: #f05252;
+  --display: "Barlow Condensed", "Bahnschrift", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  --radius: 6px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--signal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 3px; }
+img, svg, canvas { max-width: 100%; }
+
+.wrap { width: min(1200px, 100% - 40px); margin-inline: auto; }
+.mono { font-family: var(--mono); }
+.eyebrow {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h2 {
+  font: 600 clamp(34px, 4.4vw, 52px)/1.02 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.lede { color: var(--ink-dim); max-width: 62ch; font-size: 17px; margin: 0; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 0 18px;
+  border-radius: 4px; border: 1px solid var(--line-strong);
+  font: 600 15px/1 var(--body); color: var(--ink);
+  background: var(--panel-2); cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { text-decoration: none; background: #202631; border-color: #3d4756; }
+.btn-primary { background: var(--signal-fill); border-color: var(--signal-fill); color: #fff; }
+.btn-primary:hover { background: #3b7cf0; border-color: #3b7cf0; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn small { font: 500 11px/1 var(--mono); opacity: .8; }
+
+/* ---------- nav ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(11, 14, 18, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav .wrap { display: flex; align-items: center; gap: 28px; min-height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.brand:hover { text-decoration: none; }
+.brand b { font: 700 21px/1 var(--display); letter-spacing: 0.06em; }
+.mark { width: 30px; height: 30px; flex: none; }
+.nav-links { display: flex; gap: 24px; margin-left: auto; }
+.nav-links a { color: var(--ink-dim); font-size: 14px; font-weight: 500; }
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
+.nav .btn { min-height: 38px; font-size: 14px; }
+@media (max-width: 820px) { .nav-links { display: none; } .nav .btn { margin-left: auto; } }
+
+/* ---------- hero ---------- */
+.hero { padding: 72px 0 56px; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: .35;
+  mask-image: radial-gradient(ellipse 70% 60% at 70% 30%, #000 20%, transparent 75%);
+}
+.hero .wrap { position: relative; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; }
+.hero h1 {
+  font: 700 clamp(42px, 6vw, 78px)/0.94 var(--display);
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  margin: 18px 0 22px;
+}
+.hero h1 em { font-style: normal; color: var(--brand); }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 30px 0 28px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; list-style: none; }
+.facts li { font: 500 12.5px/1 var(--mono); color: var(--ink-dim); display: flex; align-items: center; gap: 8px; }
+.facts li::before { content: ""; width: 6px; height: 6px; background: var(--ok); border-radius: 1px; }
+@media (max-width: 980px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 40px; } }
+
+/* ---------- product console (illustration) ---------- */
+.console {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #0d1014;
+  box-shadow: 0 30px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(76,141,255,.05);
+  overflow: hidden;
+  font-size: 12px;
+}
+.console-title {
+  display: flex; align-items: center; gap: 10px;
+  height: 32px; padding: 0 12px;
+  background: #0f1217; border-bottom: 1px solid var(--line);
+  font: 500 11px/1 var(--mono); color: var(--ink-faint);
+}
+.console-title .dots { display: flex; gap: 6px; margin-left: auto; }
+.console-title .dots i { width: 10px; height: 10px; border-radius: 50%; background: #262d38; display: block; }
+.console-body { display: grid; grid-template-columns: 48px minmax(0, 1fr); min-height: 380px; }
+.rail { background: #0f1217; border-right: 1px solid var(--line); padding: 10px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.rail span { width: 32px; height: 30px; display: grid; place-items: center; border-radius: 4px; color: var(--ink-faint); position: relative; }
+.rail span.on { background: var(--panel-2); color: var(--signal); }
+.rail span.on::before { content: ""; position: absolute; left: -8px; top: 7px; bottom: 7px; width: 2px; background: var(--signal); }
+.rail svg { width: 16px; height: 16px; }
+.main { padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.crumb { font: 500 10px/1 var(--mono); color: var(--ink-faint); letter-spacing: .08em; }
+.band { display: flex; gap: 14px; align-items: center; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.ring { width: 74px; height: 74px; flex: none; }
+.band h3 { font: 600 16px/1.2 var(--body); }
+.band .sub { font: 400 10.5px/1.5 var(--mono); color: var(--ink-faint); }
+.tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.tag { font: 600 9.5px/1 var(--body); letter-spacing: .04em; padding: 3px 6px; border-radius: 3px; border: 1px solid; }
+.tag.ok { color: var(--ok); border-color: rgba(47,191,113,.35); background: rgba(47,191,113,.1); }
+.tag.info { color: var(--signal); border-color: rgba(76,141,255,.35); background: rgba(76,141,255,.1); }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 10px 8px; min-width: 0; }
+.tile .k { font: 600 9px/1 var(--body); letter-spacing: .08em; color: var(--ink-faint); text-transform: uppercase; }
+.tile .v { font: 500 19px/1.35 var(--mono); }
+.tile canvas { width: 100%; height: 26px; display: block; margin-top: 4px; }
+.checks { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.checks header { display: flex; justify-content: space-between; padding: 7px 10px; border-bottom: 1px solid var(--line); font: 600 9.5px/1 var(--body); letter-spacing: .08em; color: var(--ink-faint); }
+.checks header span:last-child { font-family: var(--mono); letter-spacing: 0; }
+.checks ol { list-style: none; margin: 0; padding: 4px 0; }
+.checks li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 4px 10px; font-size: 11.5px; }
+.checks li .what { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.checks li .what small { color: var(--ink-faint); font-family: var(--mono); font-size: 10px; margin-left: 6px; }
+.state { font: 600 9px/1 var(--body); letter-spacing: .06em; padding: 3px 6px; border-radius: 3px; border: 1px solid; min-width: 62px; text-align: center; }
+.state.passed { color: var(--ok); border-color: rgba(47,191,113,.35); background: rgba(47,191,113,.1); }
+.state.warning { color: var(--warn); border-color: rgba(240,180,41,.35); background: rgba(240,180,41,.1); }
+.state.running { color: var(--signal); border-color: rgba(76,141,255,.35); background: rgba(76,141,255,.1); }
+.state.pending { color: var(--ink-faint); border-color: var(--line-strong); background: transparent; }
+.statusbar { display: flex; gap: 14px; padding: 6px 12px; background: #0f1217; border-top: 1px solid var(--line); font: 500 10px/1 var(--mono); color: var(--ink-faint); white-space: nowrap; overflow: hidden; }
+.statusbar b { font-weight: 500; color: var(--ok); }
+.caption { margin: 10px 0 0; font: 400 12px/1.4 var(--mono); color: var(--ink-faint); }
+@media (max-width: 560px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .console-body { grid-template-columns: minmax(0, 1fr); }
+  .rail { display: none; }
+}
+
+/* ---------- sections ---------- */
+section { padding: 96px 0; border-bottom: 1px solid var(--line); }
+.head { display: grid; gap: 16px; margin-bottom: 48px; max-width: 760px; }
+
+/* workflow */
+.flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.step { padding: 28px; background: var(--panel); position: relative; }
+.step + .step { border-left: 1px solid var(--line); }
+.step .n { font: 500 12px/1 var(--mono); color: var(--signal); }
+.step h3 { font: 600 30px/1 var(--display); text-transform: uppercase; margin: 14px 0 12px; }
+.step p { margin: 0 0 16px; color: var(--ink-dim); }
+.step ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.step li { font: 400 13px/1.45 var(--mono); color: var(--ink-dim); padding-left: 16px; position: relative; }
+.step li::before { content: "›"; position: absolute; left: 0; color: var(--ink-faint); }
+@media (max-width: 860px) { .flow { grid-template-columns: 1fr; } .step + .step { border-left: 0; border-top: 1px solid var(--line); } }
+
+/* modules */
+.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.mod { background: var(--panel); padding: 24px; display: grid; gap: 10px; align-content: start; transition: background .15s; }
+.mod:hover { background: #161b22; }
+.mod .top { display: flex; align-items: center; justify-content: space-between; }
+.mod svg { width: 22px; height: 22px; color: var(--signal); }
+.mod .count { font: 500 11px/1 var(--mono); color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; }
+.mod h3 { font: 600 17px/1.25 var(--body); }
+.mod p { margin: 0; font-size: 14.5px; color: var(--ink-dim); }
+
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* workshop */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+@media (max-width: 920px) { .split { grid-template-columns: 1fr; } }
+.track { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.track li { display: grid; grid-template-columns: 28px 1fr auto; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+.track li::before { counter-increment: s; content: counter(s, decimal-leading-zero); font: 500 11px/1 var(--mono); color: var(--ink-faint); }
+.track li span { font: 500 11px/1 var(--mono); color: var(--ink-faint); }
+.track li.hl { color: var(--ink); }
+.track li.hl span { color: var(--warn); }
+.ticket { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.ticket header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.ticket header b { font: 500 16px/1 var(--mono); }
+.ticket dl { margin: 0; padding: 16px 18px; display: grid; grid-template-columns: 140px 1fr; gap: 10px 16px; font-size: 14px; }
+.ticket dt { color: var(--ink-faint); font: 500 12px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .04em; }
+.ticket dd { margin: 0; }
+.ticket .hist { border-top: 1px solid var(--line); padding: 14px 18px; display: grid; gap: 6px; font: 400 12.5px/1.45 var(--mono); color: var(--ink-dim); }
+.ticket .hist time { color: var(--ink-faint); margin-right: 10px; }
+.note { font: 400 12px/1.4 var(--mono); color: var(--ink-faint); margin: 10px 0 0; }
+
+/* safety */
+.rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 860px) { .rules { grid-template-columns: 1fr; } }
+.rulebox { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+.rulebox h3 { padding: 14px 20px; border-bottom: 1px solid var(--line); font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.rulebox.never h3 { color: var(--crit); }
+.rulebox.always h3 { color: var(--ok); }
+.rulebox ul { list-style: none; margin: 0; padding: 8px 20px 16px; }
+.rulebox li { padding: 10px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 22px 1fr; gap: 10px; font-size: 15px; }
+.rulebox li:last-child { border-bottom: 0; }
+.rulebox li svg { width: 16px; height: 16px; margin-top: 4px; }
+.never li svg { color: var(--crit); }
+.always li svg { color: var(--ok); }
+
+/* specs */
+.specs { width: 100%; border-collapse: collapse; font-size: 15px; }
+.specs-box { border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; background: var(--panel); }
+.specs th, .specs td { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.specs tr:last-child th, .specs tr:last-child td { border-bottom: 0; }
+.specs th { width: 230px; font: 500 12px/1.6 var(--mono); color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
+.specs td .mono { font-size: 14px; }
+.pending-tag { font: 500 11px/1 var(--mono); color: var(--warn); border: 1px solid rgba(240,180,41,.35); padding: 2px 6px; border-radius: 3px; margin-left: 8px; white-space: nowrap; }
+
+/* download */
+.dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 920px) { .dl { grid-template-columns: 1fr; } }
+.pkg { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); padding: 24px; display: grid; gap: 12px; align-content: start; }
+.pkg.main { border-color: rgba(76,141,255,.45); background: linear-gradient(180deg, rgba(76,141,255,.06), transparent 60%), var(--panel); }
+.pkg h3 { font: 600 24px/1 var(--display); text-transform: uppercase; }
+.pkg p { margin: 0; color: var(--ink-dim); font-size: 14.5px; }
+.pkg code { font: 400 12.5px/1 var(--mono); color: var(--ink-faint); }
+.pkg .btn { justify-self: start; margin-top: 6px; }
+.build { margin-top: 32px; border: 1px solid var(--line); border-radius: var(--radius); background: #0d1014; }
+.build header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); font: 500 12px/1 var(--mono); color: var(--ink-faint); }
+.build header button { min-height: 32px; padding: 0 12px; font-size: 13px; }
+.build pre { margin: 0; padding: 16px; overflow-x: auto; font: 400 13.5px/1.7 var(--mono); color: var(--ink); }
+.build pre .c { color: var(--ink-faint); }
+
+/* faq */
+.faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; border-top: 1px solid var(--line); }
+.faq div { border-bottom: 1px solid var(--line); padding: 22px 0; }
+.faq h3 { font: 600 17px/1.4 var(--body); margin: 0 0 8px; }
+.faq p { margin: 0; color: var(--ink-dim); max-width: 62ch; }
+@media (max-width: 860px) { .faq { grid-template-columns: minmax(0, 1fr); } }
+
+footer { padding: 40px 0 56px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; }
+footer p { margin: 0; font: 400 12.5px/1.5 var(--mono); color: var(--ink-faint); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-chip" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="10" height="10" rx="1.5"/><rect x="8" y="8" width="4" height="4" rx=".5"/><path d="M7.5 2.5V5M10 2.5V5M12.5 2.5V5M7.5 15v2.5M10 15v2.5M12.5 15v2.5M2.5 7.5H5M2.5 10H5M2.5 12.5H5M15 7.5h2.5M15 10h2.5M15 12.5h2.5"/></g></symbol>
+    <symbol id="i-heart" viewBox="0 0 20 20"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M2 10.5h4l2-4 3 8 2-4h5"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 20 20"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M14.3 9.4a4 4 0 1 0-3.7-3.7L3.5 12.8a1.6 1.6 0 0 0 2.3 2.3l7.1-7.1"/></symbol>
+    <symbol id="i-driver" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="6" width="14" height="9" rx="1.5"/><path d="M6 15v2.5M9 15v2.5M12 15v2.5M6 9.5h8M6 12h5M8 3v3M12 3v3"/></g></symbol>
+    <symbol id="i-users" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="7" r="3"/><path d="M2.5 17a5.5 5.5 0 0 1 11 0"/><circle cx="14.5" cy="7.5" r="2.3"/><path d="M14 12.3a4 4 0 0 1 4.5 4.2"/></g></symbol>
+    <symbol id="i-doc" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h7l3.5 3.5v11.5H5z"/><path d="M12 2.5V6h3.5M7.5 10H13M7.5 13H13"/></g></symbol>
+    <symbol id="i-package" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 2.5 17 6v8l-7 3.5L3 14V6z"/><path d="M3 6l7 3.5L17 6M10 9.5v8"/></g></symbol>
+    <symbol id="i-globe" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><ellipse cx="10" cy="10" rx="3" ry="7"/><path d="M3 10h14"/></g></symbol>
+    <symbol id="i-term" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M6 8l2.5 2L6 12M10 12.5h4"/></g></symbol>
+    <symbol id="i-list" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 5h10M7 10h10M7 15h10"/><circle cx="4" cy="5" r=".9" fill="currentColor"/><circle cx="4" cy="10" r=".9" fill="currentColor"/><circle cx="4" cy="15" r=".9" fill="currentColor"/></g></symbol>
+    <symbol id="i-grid" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></g></symbol>
+    <symbol id="i-gear" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="2.6"/><circle cx="10" cy="10" r="5.6"/><path d="M10 2.2v2.2M10 15.6v2.2M2.2 10h2.2M15.6 10h2.2M4.5 4.5l1.5 1.5M14 14l1.5 1.5M4.5 15.5 6 14M14 6l1.5-1.5"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 20 20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 10.5l4 4 8-9"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 20 20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 5l10 10M15 5 5 15"/></symbol>
+    <symbol id="i-download" viewBox="0 0 20 20"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M10 3v10M6 9l4 4 4-4M4 16.5h12"/></symbol>
+    <symbol id="i-mark" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0f1114"/><path d="M16 3.5 28.5 16 16 28.5 3.5 16z" fill="#ff7a1a"/><path d="M16 7.8 24.2 16 16 24.2 7.8 16z" fill="#0f1114"/><path d="M16 11.2 20.8 16 16 20.8 11.2 16z" fill="#4c8dff"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="FORGEPOINT home"><svg class="mark" aria-hidden="true"><use href="#i-mark"/></svg><b>FORGEPOINT</b></a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#workflow">Workflow</a>
+      <a href="#modules">Modules</a>
+      <a href="#workshop">IT Workshop</a>
+      <a href="#safety">Safety</a>
+      <a href="#specs">Specifications</a>
+    </nav>
+    <a class="btn btn-primary" href="#download"><svg aria-hidden="true"><use href="#i-download"/></svg>Download</a>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Windows diagnostics · repair · IT workshop</p>
+      <h1>Diagnose, repair and document every <em>Windows</em> machine.</h1>
+      <p class="lede">FORGEPOINT is a native console for technicians, repair shops and IT teams. It runs 23 read-only health checks, walks you through Windows repairs that explain themselves before they change anything, backs up drivers, and keeps every job in a built-in repair-ticket workshop. All local, all audited.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#download"><svg aria-hidden="true"><use href="#i-download"/></svg>Download for Windows <small>x64</small></a>
+        <a class="btn" href="#modules">See the modules</a>
+      </div>
+      <ul class="facts" aria-label="At a glance">
+        <li>Native Rust</li>
+        <li>Local SQLite</li>
+        <li>No telemetry</li>
+        <li>Runs as standard user</li>
+      </ul>
+    </div>
+
+    <figure style="margin:0">
+      <div class="console" role="img" aria-label="Illustration of the FORGEPOINT dashboard: health score 92, live CPU and memory charts, and a list of diagnostic checks completing one by one.">
+        <div class="console-title"><svg width="14" height="14" aria-hidden="true"><use href="#i-mark"/></svg>FORGEPOINT — WS-0142<div class="dots"><i></i><i></i><i></i></div></div>
+        <div class="console-body">
+          <div class="rail" aria-hidden="true">
+            <span class="on"><svg><use href="#i-grid"/></svg></span>
+            <span><svg><use href="#i-chip"/></svg></span>
+            <span><svg><use href="#i-heart"/></svg></span>
+            <span><svg><use href="#i-wrench"/></svg></span>
+            <span><svg><use href="#i-driver"/></svg></span>
+            <span><svg><use href="#i-users"/></svg></span>
+            <span><svg><use href="#i-globe"/></svg></span>
+            <span><svg><use href="#i-term"/></svg></span>
+          </div>
+          <div class="main">
+            <div class="crumb">FORGEPOINT / OVERVIEW / DASHBOARD</div>
+            <div class="band">
+              <svg class="ring" viewBox="0 0 80 80" aria-hidden="true">
+                <circle cx="40" cy="40" r="33" fill="none" stroke="#1a1f27" stroke-width="6"/>
+                <circle cx="40" cy="40" r="33" fill="none" stroke="#2fbf71" stroke-width="6" stroke-dasharray="190.8 207.3" transform="rotate(-90 40 40)"/>
+                <text x="40" y="44" text-anchor="middle" fill="#e8ebf0" font-family="IBM Plex Mono, Consolas, monospace" font-size="20" font-weight="500">92</text>
+                <text x="40" y="57" text-anchor="middle" fill="#7e8898" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" letter-spacing="1">HEALTH</text>
+              </svg>
+              <div>
+                <h3>WS-0142</h3>
+                <div class="sub">Windows 11 Pro 24H2 | uptime 3d 4h | 16 logical CPUs | x86_64</div>
+                <div class="tags"><span class="tag ok">ALL INDICATORS NOMINAL</span><span class="tag info">STANDARD USER</span></div>
+              </div>
+            </div>
+            <div class="tiles">
+              <div class="tile"><div class="k">Processor</div><div class="v" id="cpu-v">12%</div><canvas id="cpu-c" width="160" height="26"></canvas></div>
+              <div class="tile"><div class="k">Memory</div><div class="v" id="mem-v">41%</div><canvas id="mem-c" width="160" height="26"></canvas></div>
+              <div class="tile"><div class="k">Storage</div><div class="v">38%</div><div style="font:400 10px/1.4 var(--mono);color:var(--ink-faint);margin-top:6px">free on C:\</div></div>
+              <div class="tile"><div class="k">Uptime</div><div class="v">3d 4h</div><div style="font:400 10px/1.4 var(--mono);color:var(--ink-faint);margin-top:6px">2 interfaces</div></div>
+            </div>
+            <div class="checks">
+              <header><span>HARDWARE DIAGNOSTICS</span><span id="check-count">6 / 6</span></header>
+              <ol id="checks">
+                <li><span class="what">Processor<small>8 cores / 16 threads</small></span><span class="state passed">PASSED</span></li>
+                <li><span class="what">Memory modules<small>2 modules, 32.0 GiB</small></span><span class="state passed">PASSED</span></li>
+                <li><span class="what">Physical drives and SMART health<small>3 drives healthy</small></span><span class="state passed">PASSED</span></li>
+                <li><span class="what">Graphics adapters<small>1 adapter</small></span><span class="state passed">PASSED</span></li>
+                <li><span class="what">Battery<small>none (desktop)</small></span><span class="state pending">UNSUPPORTED</span></li>
+                <li><span class="what">Windows activation<small>licensed</small></span><span class="state passed">PASSED</span></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="statusbar"><span><b>●</b> DB OK</span><span>WS-0142</span><span>USER</span><span id="sb-cpu">CPU 12%</span><span id="sb-mem">MEM 41%</span><span>UP 3d 4h</span><span style="margin-left:auto">v0.2.0 x86_64</span></div>
+      </div>
+      <figcaption class="caption">Illustration of the dashboard with example values.</figcaption>
+    </figure>
+  </div>
+</div>
+
+<section id="workflow">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">One console, three stages</p>
+      <h2>From symptom to signed-off job</h2>
+      <p class="lede">Every machine that comes across your bench goes through the same three stages. FORGEPOINT keeps the evidence from each one.</p>
+    </div>
+    <div class="flow">
+      <div class="step">
+        <span class="n">01</span>
+        <h3>Diagnose</h3>
+        <p>Find out what is actually wrong before touching anything.</p>
+        <ul>
+          <li>14 hardware checks, 9 Windows checks</li>
+          <li>SMART health, battery wear, driver faults</li>
+          <li>Missing data shown as unavailable, never guessed</li>
+        </ul>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <h3>Repair</h3>
+        <p>Run Windows' own repair tools with the safety rails a busy bench needs.</p>
+        <ul>
+          <li>SFC, DISM, Update reset, temp cleanup</li>
+          <li>Exact command shown before it runs</li>
+          <li>Restore point first, with one click</li>
+        </ul>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <h3>Document</h3>
+        <p>Hand back the machine with a record of what was found and done.</p>
+        <ul>
+          <li>Repair tickets with approvals and parts</li>
+          <li>Attach this PC's diagnostic results</li>
+          <li>PDF repair and job-completion reports</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modules">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">10 modules</p>
+      <h2>Everything on the bench, in one window</h2>
+    </div>
+    <div class="grid">
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-chip"/></svg><span class="count">14 checks</span></div><h3>Diagnostics</h3><p>Board, BIOS, CPU, memory modules, GPUs, displays, drives with SMART, partitions, battery, network, USB, PCI, audio and peripherals.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-heart"/></svg><span class="count">9 checks</span></div><h3>Windows Health</h3><p>Version, activation, Secure Boot, update state, Defender and firewall status, crash summary, restore points, DISM and SFC verify.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-wrench"/></svg><span class="count">12 operations</span></div><h3>Repair Centre</h3><p>SFC, DISM restore, component cleanup, DNS flush, Windows Update reset, temp and Recycle Bin cleanup, restore points.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-driver"/></svg><span class="count">pnputil backup</span></div><h3>Driver Workshop</h3><p>Every installed driver with provider, version and date. Problem devices explained, packages exported before you change anything.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-users"/></svg><span class="count">9 statuses</span></div><h3>IT Workshop</h3><p>Customers, devices and repair tickets with history, approvals, parts and printable reports.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-doc"/></svg><span class="count">PDF · CSV · JSON · TXT</span></div><h3>Reports</h3><p>Pick the sections you need and save a branded report for the customer or the asset record.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-package"/></svg><span class="count">4 views</span></div><h3>Software &amp; Startup</h3><p>Installed apps, startup items, live processes and services, with protected system components locked.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-globe"/></svg><span class="count">5-step check</span></div><h3>Network Workshop</h3><p>Adapter to router to internet to DNS to web, explained in plain language. Ping, DNS lookup and Wi-Fi details.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-term"/></svg><span class="count">PowerShell · CMD</span></div><h3>Script Workshop</h3><p>Templates, a risk check that flags destructive commands, captured output and exit codes, and a full run history.</p></article>
+      <article class="mod"><div class="top"><svg aria-hidden="true"><use href="#i-list"/></svg><span class="count">every action</span></div><h3>Activity Log</h3><p>An audit trail of every check, repair, export and script, filterable and exportable to CSV.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="workshop">
+  <div class="wrap split">
+    <div>
+      <div class="head" style="margin-bottom:0">
+        <p class="eyebrow">IT Workshop</p>
+        <h2>A repair desk built into the toolkit</h2>
+        <p class="lede">Open a ticket, attach the diagnostics you just ran on that machine, record the customer's approval, and print the completion report when it goes back out the door. Records stay in a local database, with JSON export for moving between sites.</p>
+      </div>
+      <ol class="track" aria-label="Ticket statuses">
+        <li>Received</li>
+        <li>Awaiting diagnosis</li>
+        <li>Diagnosing</li>
+        <li class="hl">Awaiting approval <span>customer decision recorded</span></li>
+        <li>Awaiting parts</li>
+        <li>In repair</li>
+        <li>Testing</li>
+        <li class="hl">Completed <span>date stamped</span></li>
+        <li>Collected</li>
+      </ol>
+    </div>
+    <div>
+      <div class="ticket">
+        <header><b>T-00042</b><span class="tag ok">COMPLETED</span></header>
+        <dl>
+          <dt>Customer</dt><dd>Example Customer · C-00017</dd>
+          <dt>Device</dt><dd>Desktop · ASUS ROG STRIX B550-E</dd>
+          <dt>Problem</dt><dd>Random restarts under load</dd>
+          <dt>Diagnosis</dt><dd>Unexpected shutdown events in the last 7 days; PSU suspected</dd>
+          <dt>Work</dt><dd>Replaced power supply, ran checks again</dd>
+          <dt>Parts</dt><dd>650 W PSU</dd>
+          <dt>Approval</dt><dd>Approved by customer, by phone</dd>
+        </dl>
+        <div class="hist">
+          <div><time>09:12</time>Ticket opened (Received)</div>
+          <div><time>10:40</time>Approval: Approved by customer (by phone)</div>
+          <div><time>15:05</time>Status changed from Testing to Completed</div>
+        </div>
+      </div>
+      <p class="note">Example ticket. Customer details are illustrative.</p>
+    </div>
+  </div>
+</section>
+
+<section id="safety">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Safety model</p>
+      <h2>Safe on machines that matter</h2>
+      <p class="lede">Read-only checks need no administrator rights. Anything that changes a system explains what it will do, shows the exact command, says whether it needs elevation, and waits for you.</p>
+    </div>
+    <div class="rules">
+      <div class="rulebox never">
+        <h3>FORGEPOINT never</h3>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-cross"/></svg>Disables Windows Defender or the firewall</li>
+          <li><svg aria-hidden="true"><use href="#i-cross"/></svg>Stops security or core Windows services, or ends critical processes</li>
+          <li><svg aria-hidden="true"><use href="#i-cross"/></svg>Removes drivers automatically</li>
+          <li><svg aria-hidden="true"><use href="#i-cross"/></svg>Edits the registry behind your back</li>
+          <li><svg aria-hidden="true"><use href="#i-cross"/></svg>Runs a downloaded script without you reviewing it</li>
+          <li><svg aria-hidden="true"><use href="#i-cross"/></svg>Sends your data anywhere</li>
+        </ul>
+      </div>
+      <div class="rulebox always">
+        <h3>FORGEPOINT always</h3>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Shows the exact command before a repair runs</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Asks for a second confirmation on risky scripts</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Deletes only the temp files it listed, never folders or recent files</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Saves a safety copy before restoring a database backup</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Records every action in the activity log</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Labels anything Windows can't report as unavailable</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="specs">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Specifications</p>
+      <h2>Technical details</h2>
+    </div>
+    <div class="specs-box">
+      <table class="specs">
+        <tbody>
+          <tr><th scope="row">Platform</th><td>Windows 11, 64-bit (x64)<br>Windows 10, 64-bit <span class="pending-tag">testing</span><br>Windows on ARM (ARM64) <span class="pending-tag">experimental build</span></td></tr>
+          <tr><th scope="row">Engine</th><td>Native Rust application with a GPU-accelerated interface. No browser, no runtime to install.</td></tr>
+          <tr><th scope="row">Size</th><td><span class="mono">≈ 7.5 MB</span> single executable</td></tr>
+          <tr><th scope="row">Privileges</th><td>Runs as a standard user. Restarts as administrator only when you ask, through the normal Windows prompt.</td></tr>
+          <tr><th scope="row">Data storage</th><td>Local SQLite database in your profile, or beside the executable in portable mode. Backup and restore built in.</td></tr>
+          <tr><th scope="row">Report formats</th><td><span class="mono">PDF · TXT · CSV · JSON</span></td></tr>
+          <tr><th scope="row">Network use</th><td>Only the tests you start (ping, DNS lookup, connection check). No telemetry, no accounts.</td></tr>
+          <tr><th scope="row">Editions</th><td>Installer with Start Menu shortcut and uninstaller · portable ZIP for a USB toolkit</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Version 0.2.0</p>
+      <h2>Get FORGEPOINT</h2>
+      <p class="lede">Install it on your bench machine, or carry the portable edition on a USB drive. Your data is kept when you upgrade.</p>
+    </div>
+    <div class="dl">
+      <div class="pkg main">
+        <h3>Installer</h3>
+        <p>Start Menu shortcut, optional desktop shortcut and a proper uninstaller.</p>
+        <code>FORGEPOINT-Setup-x64.exe</code>
+        <a class="btn btn-primary" href="https://github.com/MagGoTzYT/forgepoint/releases/latest/download/FORGEPOINT-Setup-x64.exe"><svg aria-hidden="true"><use href="#i-download"/></svg>Download installer</a>
+      </div>
+      <div class="pkg">
+        <h3>Portable</h3>
+        <p>No installation. Data stays in a folder next to the program.</p>
+        <code>FORGEPOINT-Portable-x64.zip</code>
+        <a class="btn" href="https://github.com/MagGoTzYT/forgepoint/releases/latest/download/FORGEPOINT-Portable-x64.zip"><svg aria-hidden="true"><use href="#i-download"/></svg>Download ZIP</a>
+      </div>
+      <div class="pkg">
+        <h3>ARM64</h3>
+        <p>For Windows on ARM devices. Built automatically, not yet tested on hardware.</p>
+        <code>FORGEPOINT-Portable-arm64.zip</code>
+        <a class="btn" href="https://github.com/MagGoTzYT/forgepoint/releases/latest/download/FORGEPOINT-Portable-arm64.zip"><svg aria-hidden="true"><use href="#i-download"/></svg>Download ZIP</a>
+      </div>
+    </div>
+    <div class="build">
+      <header><span>Verify your download (PowerShell). Compare with <a href="https://github.com/MagGoTzYT/forgepoint/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a></span><button class="btn" type="button" id="copy-build">Copy</button></header>
+<pre id="build-cmds"><span class="c"># prints the file's SHA-256; it must match the line in SHA256SUMS.txt</span>
+Get-FileHash .\FORGEPOINT-Setup-x64.exe -Algorithm SHA256</pre>
+    </div>
+  </div>
+</section>
+
+<section id="faq" style="border-bottom:0">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Questions</p>
+      <h2>Before you install</h2>
+    </div>
+    <div class="faq">
+      <div><h3>Does it need administrator rights?</h3><p>No. Every read-only check runs as a standard user. A few repairs, such as SFC, DISM and driver backup, need elevation; FORGEPOINT marks those clearly and restarts itself as administrator only when you choose to, through the normal Windows prompt.</p></div>
+      <div><h3>Does it send any data off the machine?</h3><p>No. There is no telemetry and no account. The only network traffic is from tests you start yourself, such as ping, DNS lookup and the connection check.</p></div>
+      <div><h3>Will it fix things automatically?</h3><p>Never without you. Each repair explains what it does and shows the exact command first. Risky scripts need an extra confirmation, and security features are never switched off.</p></div>
+      <div><h3>Can I manage many machines from one console?</h3><p>FORGEPOINT works on the machine it is running on. For a fleet, technicians carry the portable edition on a USB drive, and workshop records move between installations as JSON exports.</p></div>
+      <div><h3>Where is customer data stored?</h3><p>In a local SQLite database on the machine running FORGEPOINT, or beside the executable in portable mode. It only stores what a repair desk needs: name and, optionally, phone, email and notes.</p></div>
+      <div><h3>What happens when Windows can't report something?</h3><p>FORGEPOINT says so. Temperatures, SMART counters and battery wear appear only when the hardware and Windows provide them; nothing is estimated or made up.</p></div>
+      <div><h3>Why does Windows SmartScreen warn me?</h3><p>FORGEPOINT is not code-signed yet, so Windows doesn't recognise the publisher. Download only from this page, check the SHA-256 checksum above, then choose <em>More info → Run anyway</em>.</p></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Back to top"><svg class="mark" aria-hidden="true"><use href="#i-mark"/></svg><b>FORGEPOINT</b></a>
+    <p>PC diagnostics &amp; IT workshop for Windows · v0.2.0</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Copy the build commands (clipboard only works from a click).
+  var copy = document.getElementById("copy-build");
+  copy.addEventListener("click", function () {
+    var text = "cargo test\npowershell -ExecutionPolicy Bypass -File scripts\\package.ps1";
+    var done = function (ok) { copy.textContent = ok ? "Copied" : "Select and copy"; setTimeout(function () { copy.textContent = "Copy"; }, 1800); };
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
+    catch (e) { done(false); }
+  });
+
+  // Live sparklines in the console illustration.
+  function series(start, wobble, n) {
+    var out = [], v = start;
+    for (var i = 0; i < n; i++) { v = Math.min(0.95, Math.max(0.04, v + (Math.random() - 0.5) * wobble)); out.push(v); }
+    return out;
+  }
+  var cpu = series(0.14, 0.10, 48), mem = series(0.41, 0.012, 48);
+  function draw(id, data, colour) {
+    var c = document.getElementById(id); if (!c) return;
+    var g = c.getContext("2d"), w = c.width, h = c.height;
+    g.clearRect(0, 0, w, h);
+    g.strokeStyle = "rgba(49,58,71,.6)"; g.lineWidth = 1;
+    [0.5].forEach(function (q) { g.beginPath(); g.moveTo(0, Math.round(h - h * q) + 0.5); g.lineTo(w, Math.round(h - h * q) + 0.5); g.stroke(); });
+    g.beginPath();
+    data.forEach(function (v, i) { var x = (i / (data.length - 1)) * w, y = h - v * h; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.strokeStyle = colour; g.lineWidth = 1.5; g.stroke();
+    g.lineTo(w, h); g.lineTo(0, h); g.closePath();
+    g.fillStyle = colour === "#4c8dff" ? "rgba(76,141,255,.12)" : "rgba(47,191,113,.12)"; g.fill();
+    var lx = w, ly = h - data[data.length - 1] * h;
+    g.beginPath(); g.arc(lx - 2, ly, 2.2, 0, Math.PI * 2); g.fillStyle = colour; g.fill();
+  }
+  function render() {
+    draw("cpu-c", cpu, "#4c8dff"); draw("mem-c", mem, "#2fbf71");
+    var c = Math.round(cpu[cpu.length - 1] * 100), m = Math.round(mem[mem.length - 1] * 100);
+    document.getElementById("cpu-v").textContent = c + "%";
+    document.getElementById("mem-v").textContent = m + "%";
+    document.getElementById("sb-cpu").textContent = "CPU " + c + "%";
+    document.getElementById("sb-mem").textContent = "MEM " + m + "%";
+  }
+  render();
+  if (reduce) return;
+  setInterval(function () {
+    cpu.shift(); cpu.push(Math.min(0.95, Math.max(0.04, cpu[cpu.length - 1] + (Math.random() - 0.5) * 0.12)));
+    mem.shift(); mem.push(Math.min(0.9, Math.max(0.3, mem[mem.length - 1] + (Math.random() - 0.5) * 0.015)));
+    render();
+  }, 1000);
+
+  // Replay the checks: each one goes Running -> its result, then the run repeats.
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#checks .state"));
+  var finals = rows.map(function (r) { return { cls: r.className, text: r.textContent }; });
+  var counter = document.getElementById("check-count");
+  function set(r, cls, text) { r.className = "state " + cls; r.textContent = text; }
+  function cycle() {
+    rows.forEach(function (r) { set(r, "pending", "PENDING"); });
+    counter.textContent = "0 / " + rows.length;
+    rows.forEach(function (r, i) {
+      setTimeout(function () { set(r, "running", "RUNNING"); }, 600 + i * 900);
+      setTimeout(function () { r.className = finals[i].cls; r.textContent = finals[i].text; counter.textContent = (i + 1) + " / " + rows.length; }, 1300 + i * 900);
+    });
+    setTimeout(cycle, 1300 + rows.length * 900 + 6000);
+  }
+  setTimeout(cycle, 5000);
+})();
+</script>
+</body>
+</html>
